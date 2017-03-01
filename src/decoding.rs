@@ -13,14 +13,11 @@ pub fn decode<T: AsRef<str>>(input: T) -> Result<u64> {
                 let mut n = 0;
                 let mut base = 1;
 
-                println!("{:?}", digits);
-
                 for &value in digits.iter().rev() {
-                    println!("incrementing");
                     n += (value as u64) * base;
                     base *= BASE;
                 }
-                
+
                 Ok(n)
             }
         }

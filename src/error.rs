@@ -43,7 +43,7 @@ impl PartialEq for Error {
         fn kind_value(kind: &Kind) -> i32 {
             match *kind {
                 Kind::EmptyString => 1,
-                Kind::OutOfRange => 2, 
+                Kind::OutOfRange => 2,
                 Kind::InvalidDigit(..) => 3,
             }
         }
