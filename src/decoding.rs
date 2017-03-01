@@ -12,11 +12,17 @@ pub fn decode<T: AsRef<str>>(input: T) -> Result<u64> {
             Err(e) => Err(e),
             Ok(digits) => {
                 let mut n = 0;
-                let mut base = 1;
+                let mut base = Some(1);
 
                 for &value in digits.iter().rev() {
-                    n += (value as u64) * base;
-                    base *= BASE;
+                    match base {
+                        Some(x) => {
+                            n += (value as u64) * x;
+                            base = x.checked_mul(BASE);
+                        }
+
+                        None => return Err(Error::new(Kind::OutOfRange, "The encoded value is too large.")),
+                    }
                 }
 
                 Ok(n)
@@ -184,5 +190,10 @@ mod tests {
     fn four_zee_queue_works() {
         assert_eq!(Ok(5111), decode("4zq"));
         assert_eq!(Ok(5111), decode("4ZQ"));
+    }
+
+    #[test]
+    fn max_value_works() {
+        assert_eq!(Ok(18446744073709551615), decode("fzzzzzzzzzzzz"));
     }
 }
