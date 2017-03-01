@@ -1,4 +1,5 @@
 use error::*;
+use UPPERCASE_ENCODING;
 
 const BASE: u64 = 32;
 
@@ -33,18 +34,22 @@ fn normalize_digits(s: &str) -> Result<Vec<u8>> {
 /// Attempts to convert an ascii digit to a normalized form.
 fn to_normal_digit(idx: usize, u: u8) -> Result<u8> {
     const INT_OFFSET: u8 = b'0';
-    const UPPERCASE_OFFSET: u8 = b'A' - 6;
-    const LOWERCASE_OFFSET: u8 = b'a' - 6;
+    const LOWERCASE_OFFSET: u8 = b'a' - b'A';
 
     match u {
         b'0' | b'O' | b'o' => Ok(0),
         b'1' | b'I' | b'i' | b'L' | b'l' => Ok(1),
 
-        // It is not valid to convert O or L using the following, but those cases
-        // should never actually fall through to this point.
         u @ b'0'...b'9' => Ok(u - INT_OFFSET),
-        u @ b'A'...b'Z' => Ok(u - UPPERCASE_OFFSET),
-        u @ b'a'...b'z' => Ok(u - LOWERCASE_OFFSET),
+        u @ b'A'...b'Z' => match UPPERCASE_ENCODING.binary_search(&u) {
+            Ok(idx) => Ok(idx as u8),
+            _ => unreachable!("Seriously, if you got here, there is a problem."),
+        },
+
+        u @ b'a'...b'z' => match UPPERCASE_ENCODING.binary_search(&(u - LOWERCASE_OFFSET)) {
+            Ok(idx) => Ok(idx as u8),
+            _ => unreachable!("C'mon, guys, I'm not kidding. This isn't possible."),
+        },
 
         _ => Err(Error::new(Kind::InvalidDigit(idx, u), "Invalid encoded digit."))
     }
@@ -161,5 +166,23 @@ mod tests {
         let actual = decode(input);
 
         assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn zee_equals_31() {
+        assert_eq!(Ok(31), decode("z"));
+        assert_eq!(Ok(31), decode("Z"));
+    }
+
+    #[test]
+    fn queue_equals_23() {
+        assert_eq!(Ok(23), decode("q"));
+        assert_eq!(Ok(23), decode("Q"));
+    }
+
+    #[test]
+    fn four_zee_queue_works() {
+        assert_eq!(Ok(5111), decode("4zq"));
+        assert_eq!(Ok(5111), decode("4ZQ"));
     }
 }
