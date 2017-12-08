@@ -1,19 +1,7 @@
-//! # Encoding
-//!
-//! Use the encode function to encode `u64` values into Crockford base 32-encoded strings. This
-//! operation cannot fail, so you will always get back a string rather than any kind of result
-//! value.
-//!
-//! ```rust
-//! let x = crockford::encode(5111);
-//!
-//! assert_eq!("4ZQ", &*x);
-//! ```
-
 use iterator::*;
 use UPPERCASE_ENCODING;
 
-/// Encodes a `u64` value as a Crockford base 32-encoded string.
+/// Encodes a `u64` value as a Crockford Base32-encoded string.
 pub fn encode(input: u64) -> String {
     let mut fits: Vec<_> = FiveBitIterator::new(input).collect();
     let mut buf = String::new();

@@ -1,22 +1,9 @@
-//! # Decoding
-//!
-//! Use the decode function to decode Crockford base 32-encoded strings. This operation can fail;
-//! if it does, you'll get a reasonably useful error instead of a number.
-//!
-//! ```rust
-//! let x = crockford::decode("4zq");
-//! let y = crockford::decode("4ZQ");
-//!
-//! assert_eq!(5111, x.unwrap());
-//! assert_eq!(5111, y.unwrap());
-//! ```
-
 use error::*;
 use UPPERCASE_ENCODING;
 
 const BASE: u64 = 32;
 
-/// Attempts to decode a Crockford base 32-encoded string into a `u64` value.
+/// Attempts to decode a Crockford Base32-encoded string into a `u64` value.
 pub fn decode<T: AsRef<str>>(input: T) -> Result<u64> {
     let input = input.as_ref();
     match input.len() {
