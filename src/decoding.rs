@@ -68,8 +68,17 @@ fn to_normal_digit(idx: usize, u: u8) -> Result<u8> {
     const LOWERCASE_OFFSET: u8 = b'a' - b'A';
 
     match u {
-        b'0' | b'O' | b'o' => Ok(0),
-        b'1' | b'I' | b'i' | b'L' | b'l' => Ok(1),
+        // Here, we opt for a slightly non-kosher behavior: we accept invalid letters such as
+        // i, I, l, L, o, and O, but we convert them into zero or one.
+        b'O' | b'o' => Ok(0),
+        b'I' | b'i' | b'L' | b'l' => Ok(1),
+
+        // U and u are relegated to use in the implementation of check digits because their
+        // presence is otherwise prone to producing accidentally obscene strings.
+        b'U' | b'u' => Err(Error::new(
+            Kind::InvalidDigit(idx, u),
+            "Invalid encoded digit.",
+        )),
 
         u @ b'0'...b'9' => Ok(u - INT_OFFSET),
         u @ b'A'...b'Z' => {
@@ -227,5 +236,11 @@ mod tests {
     #[test]
     fn max_value_works() {
         assert_eq!(Ok(18446744073709551615), decode("fzzzzzzzzzzzz"));
+    }
+
+    #[test]
+    fn u_produces_an_error_instead_of_a_crash() {
+        assert!(decode("iVuv").is_err());
+        assert!(decode("iVUv").is_err());
     }
 }
