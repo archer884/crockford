@@ -6,7 +6,9 @@ license = "MIT/Apache-2.0"
 description = """
 Provides Crockford 32-bit encoding for identifiers (e.g. u64 values).
 
-There was already another library that did Crockford encoding, but it operated on a slice of bytes or something like that, and it was really annoying to use. This one is pretty much a faithful translation of an existing C# library that does only "the needful."
+There was already another library that did Crockford encoding, but it operated on a slice of 
+bytes or something like that, and it was really annoying to use. This one is pretty much a 
+translation of an existing C# library that does only "the needful."
 """
 
 [dependencies]
