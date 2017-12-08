@@ -35,7 +35,7 @@ pub fn decode<T: AsRef<str>>(input: T) -> Result<u64> {
                     for &value in digits.iter().rev() {
                         match base {
                             Some(x) => {
-                                n += u64::from(value) * x;
+                                n += u64::from(value).wrapping_mul(x);
                                 base = x.checked_mul(BASE);
                             }
 
