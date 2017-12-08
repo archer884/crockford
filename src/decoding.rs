@@ -6,8 +6,8 @@ const BASE: u64 = 32;
 pub fn decode<T: AsRef<str>>(input: T) -> Result<u64> {
     let input = input.as_ref();
     match input.len() {
-        0 => return Err(Error::new(Kind::EmptyString, "Encoded input string is empty.")),
-        n if n > 13 => return Err(Error::new(Kind::OutOfRange, "Encoded value is too large")),
+        0 => Err(Error::new(Kind::EmptyString, "Encoded input string is empty.")),
+        n if n > 13 => Err(Error::new(Kind::OutOfRange, "Encoded value is too large")),
         _ => match normalize_digits(input) {
             Err(e) => Err(e),
             Ok(digits) => {
@@ -17,7 +17,7 @@ pub fn decode<T: AsRef<str>>(input: T) -> Result<u64> {
                 for &value in digits.iter().rev() {
                     match base {
                         Some(x) => {
-                            n += (value as u64) * x;
+                            n += u64::from(value) * x;
                             base = x.checked_mul(BASE);
                         }
 
