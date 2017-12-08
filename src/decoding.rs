@@ -6,26 +6,36 @@ const BASE: u64 = 32;
 pub fn decode<T: AsRef<str>>(input: T) -> Result<u64> {
     let input = input.as_ref();
     match input.len() {
-        0 => Err(Error::new(Kind::EmptyString, "Encoded input string is empty.")),
+        0 => Err(Error::new(
+            Kind::EmptyString,
+            "Encoded input string is empty.",
+        )),
         n if n > 13 => Err(Error::new(Kind::OutOfRange, "Encoded value is too large")),
-        _ => match normalize_digits(input) {
-            Err(e) => Err(e),
-            Ok(digits) => {
-                let mut n = 0;
-                let mut base = Some(1);
+        _ => {
+            match normalize_digits(input) {
+                Err(e) => Err(e),
+                Ok(digits) => {
+                    let mut n = 0;
+                    let mut base = Some(1);
 
-                for &value in digits.iter().rev() {
-                    match base {
-                        Some(x) => {
-                            n += u64::from(value) * x;
-                            base = x.checked_mul(BASE);
+                    for &value in digits.iter().rev() {
+                        match base {
+                            Some(x) => {
+                                n += u64::from(value) * x;
+                                base = x.checked_mul(BASE);
+                            }
+
+                            None => {
+                                return Err(Error::new(
+                                    Kind::OutOfRange,
+                                    "The encoded value is too large.",
+                                ))
+                            }
                         }
-
-                        None => return Err(Error::new(Kind::OutOfRange, "The encoded value is too large.")),
                     }
-                }
 
-                Ok(n)
+                    Ok(n)
+                }
             }
         }
     }
@@ -34,7 +44,8 @@ pub fn decode<T: AsRef<str>>(input: T) -> Result<u64> {
 fn normalize_digits(s: &str) -> Result<Vec<u8>> {
     s.bytes()
         .enumerate()
-        .map(|(i, u)| to_normal_digit(i, u)).collect()
+        .map(|(i, u)| to_normal_digit(i, u))
+        .collect()
 }
 
 /// Attempts to convert an ascii digit to a normalized form.
@@ -47,17 +58,24 @@ fn to_normal_digit(idx: usize, u: u8) -> Result<u8> {
         b'1' | b'I' | b'i' | b'L' | b'l' => Ok(1),
 
         u @ b'0'...b'9' => Ok(u - INT_OFFSET),
-        u @ b'A'...b'Z' => match UPPERCASE_ENCODING.binary_search(&u) {
-            Ok(idx) => Ok(idx as u8),
-            _ => unreachable!("Seriously, if you got here, there is a problem."),
-        },
+        u @ b'A'...b'Z' => {
+            match UPPERCASE_ENCODING.binary_search(&u) {
+                Ok(idx) => Ok(idx as u8),
+                _ => unreachable!("Seriously, if you got here, there is a problem."),
+            }
+        }
 
-        u @ b'a'...b'z' => match UPPERCASE_ENCODING.binary_search(&(u - LOWERCASE_OFFSET)) {
-            Ok(idx) => Ok(idx as u8),
-            _ => unreachable!("C'mon, guys, I'm not kidding. This isn't possible."),
-        },
+        u @ b'a'...b'z' => {
+            match UPPERCASE_ENCODING.binary_search(&(u - LOWERCASE_OFFSET)) {
+                Ok(idx) => Ok(idx as u8),
+                _ => unreachable!("C'mon, guys, I'm not kidding. This isn't possible."),
+            }
+        }
 
-        _ => Err(Error::new(Kind::InvalidDigit(idx, u), "Invalid encoded digit."))
+        _ => Err(Error::new(
+            Kind::InvalidDigit(idx, u),
+            "Invalid encoded digit.",
+        )),
     }
 }
 

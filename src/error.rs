@@ -26,8 +26,10 @@ pub enum Kind {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.kind {
-            Kind::InvalidDigit(idx, digit) => write!(f, "{} Found at {}: {}", self.message, idx, digit),
-            _ => write!(f, "{}", self.message)
+            Kind::InvalidDigit(idx, digit) => {
+                write!(f, "{} Found at {}: {}", self.message, idx, digit)
+            }
+            _ => write!(f, "{}", self.message),
         }
     }
 }
