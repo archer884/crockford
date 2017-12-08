@@ -1,8 +1,9 @@
 //! # Crockford
 //!
 //! This library is intended to provide an easy way to encode and decode identifiers 
-//! (large integers) as Crockford-encoded strings. If you want to encode or decode arbitrary
-//! data, this probably is not the library for you. (But there totally is another one.)
+//! (large integers) as [Crockford-encoded](https://www.crockford.com/wrmg/base32.html) 
+//! strings. If you want to encode or decode arbitrary data,
+//! [another library](https://docs.rs/base32) is probably a better choice.
 //! 
 //! ## Encoding
 //! 
@@ -22,11 +23,16 @@
 //! if it does, you'll get a reasonably useful error instead of a number.
 //!
 //! ```rust
+//! # use crockford::{self, Error};
+//! # fn run() -> Result<(), Error> {
 //! let x = crockford::decode("4zq");
 //! let y = crockford::decode("4ZQ");
 //!
-//! assert_eq!(5111, x.unwrap());
-//! assert_eq!(5111, y.unwrap());
+//! assert_eq!(5111, x?);
+//! assert_eq!(5111, y?);
+//! # Ok(())
+//! # }
+//! # run().unwrap()
 //! ```
 
 mod error;
