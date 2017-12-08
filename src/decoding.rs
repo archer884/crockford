@@ -76,8 +76,8 @@ fn to_normal_digit(idx: usize, u: u8) -> Result<u8> {
         // U and u are relegated to use in the implementation of check digits because their
         // presence is otherwise prone to producing accidentally obscene strings.
         b'U' | b'u' => Err(Error::new(
-            Kind::InvalidDigit(idx, u),
-            "Invalid encoded digit.",
+            Kind::CheckDigitUnsupported(idx, u),
+            "Check digits not currently supported.",
         )),
 
         u @ b'0'...b'9' => Ok(u - INT_OFFSET),

@@ -21,6 +21,7 @@ pub enum Kind {
     EmptyString,
     OutOfRange,
     InvalidDigit(usize, u8),
+    CheckDigitUnsupported(usize, u8),
 }
 
 impl fmt::Display for Error {
@@ -48,6 +49,7 @@ impl PartialEq for Error {
                 Kind::EmptyString => 1,
                 Kind::OutOfRange => 2,
                 Kind::InvalidDigit(..) => 3,
+                Kind::CheckDigitUnsupported(..) => 4,
             }
         }
 
