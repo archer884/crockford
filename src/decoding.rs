@@ -3,29 +3,40 @@ use UPPERCASE_ENCODING;
 
 const BASE: u64 = 32;
 
+/// Attempts to decode a Crockford Base32-encoded string into a `u64` value.
 pub fn decode<T: AsRef<str>>(input: T) -> Result<u64> {
     let input = input.as_ref();
     match input.len() {
-        0 => return Err(Error::new(Kind::EmptyString, "Encoded input string is empty.")),
-        n if n > 13 => return Err(Error::new(Kind::OutOfRange, "Encoded value is too large")),
-        _ => match normalize_digits(input) {
-            Err(e) => Err(e),
-            Ok(digits) => {
-                let mut n = 0;
-                let mut base = Some(1);
+        0 => Err(Error::new(
+            Kind::EmptyString,
+            "Encoded input string is empty.",
+        )),
+        n if n > 13 => Err(Error::new(Kind::OutOfRange, "Encoded value is too large")),
+        _ => {
+            match normalize_digits(input) {
+                Err(e) => Err(e),
+                Ok(digits) => {
+                    let mut n = 0;
+                    let mut base = Some(1);
 
-                for &value in digits.iter().rev() {
-                    match base {
-                        Some(x) => {
-                            n += (value as u64) * x;
-                            base = x.checked_mul(BASE);
+                    for &value in digits.iter().rev() {
+                        match base {
+                            Some(x) => {
+                                n += u64::from(value).wrapping_mul(x);
+                                base = x.checked_mul(BASE);
+                            }
+
+                            None => {
+                                return Err(Error::new(
+                                    Kind::OutOfRange,
+                                    "The encoded value is too large.",
+                                ))
+                            }
                         }
-
-                        None => return Err(Error::new(Kind::OutOfRange, "The encoded value is too large.")),
                     }
-                }
 
-                Ok(n)
+                    Ok(n)
+                }
             }
         }
     }
@@ -34,7 +45,8 @@ pub fn decode<T: AsRef<str>>(input: T) -> Result<u64> {
 fn normalize_digits(s: &str) -> Result<Vec<u8>> {
     s.bytes()
         .enumerate()
-        .map(|(i, u)| to_normal_digit(i, u)).collect()
+        .map(|(i, u)| to_normal_digit(i, u))
+        .collect()
 }
 
 /// Attempts to convert an ascii digit to a normalized form.
@@ -43,21 +55,37 @@ fn to_normal_digit(idx: usize, u: u8) -> Result<u8> {
     const LOWERCASE_OFFSET: u8 = b'a' - b'A';
 
     match u {
-        b'0' | b'O' | b'o' => Ok(0),
-        b'1' | b'I' | b'i' | b'L' | b'l' => Ok(1),
+        // Here, we opt for a slightly non-kosher behavior: we accept invalid letters such as
+        // i, I, l, L, o, and O, but we convert them into zero or one.
+        b'O' | b'o' => Ok(0),
+        b'I' | b'i' | b'L' | b'l' => Ok(1),
+
+        // U and u are relegated to use in the implementation of check digits because their
+        // presence is otherwise prone to producing accidentally obscene strings.
+        b'U' | b'u' => Err(Error::new(
+            Kind::CheckDigitUnsupported(idx, u),
+            "Check digits not currently supported.",
+        )),
 
         u @ b'0'...b'9' => Ok(u - INT_OFFSET),
-        u @ b'A'...b'Z' => match UPPERCASE_ENCODING.binary_search(&u) {
-            Ok(idx) => Ok(idx as u8),
-            _ => unreachable!("Seriously, if you got here, there is a problem."),
-        },
+        u @ b'A'...b'Z' => {
+            match UPPERCASE_ENCODING.binary_search(&u) {
+                Ok(idx) => Ok(idx as u8),
+                _ => unreachable!("Seriously, if you got here, there is a problem."),
+            }
+        }
 
-        u @ b'a'...b'z' => match UPPERCASE_ENCODING.binary_search(&(u - LOWERCASE_OFFSET)) {
-            Ok(idx) => Ok(idx as u8),
-            _ => unreachable!("C'mon, guys, I'm not kidding. This isn't possible."),
-        },
+        u @ b'a'...b'z' => {
+            match UPPERCASE_ENCODING.binary_search(&(u - LOWERCASE_OFFSET)) {
+                Ok(idx) => Ok(idx as u8),
+                _ => unreachable!("C'mon, guys, I'm not kidding. This isn't possible."),
+            }
+        }
 
-        _ => Err(Error::new(Kind::InvalidDigit(idx, u), "Invalid encoded digit."))
+        _ => Err(Error::new(
+            Kind::InvalidDigit(idx, u),
+            "Invalid encoded digit.",
+        )),
     }
 }
 
@@ -195,5 +223,11 @@ mod tests {
     #[test]
     fn max_value_works() {
         assert_eq!(Ok(18446744073709551615), decode("fzzzzzzzzzzzz"));
+    }
+
+    #[test]
+    fn u_produces_an_error_instead_of_a_crash() {
+        assert!(decode("iVuv").is_err());
+        assert!(decode("iVUv").is_err());
     }
 }

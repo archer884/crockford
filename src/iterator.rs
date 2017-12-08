@@ -3,7 +3,7 @@
 /// Note that these chunks are ordered from least significant to most, meaning
 /// you'll have to reverse them before feeding them to the average 32 bit encoding
 /// algorithm.
-pub struct FiveBitIterator {
+pub(crate) struct FiveBitIterator {
     source: Option<u64>,
     bits_per_chunk: usize,
     shift: usize,
@@ -12,11 +12,13 @@ pub struct FiveBitIterator {
 impl FiveBitIterator {
     pub fn new(source: u64) -> FiveBitIterator {
         use std::mem;
-        let bits_per_chunk = 5;
+
+        const BITS_PER_CHUNK: usize = 5;
+
         FiveBitIterator {
             source: Some(source),
-            bits_per_chunk: bits_per_chunk,
-            shift: (mem::size_of::<u64>() * 8) - bits_per_chunk,
+            bits_per_chunk: BITS_PER_CHUNK,
+            shift: (mem::size_of::<u64>() * 8) - BITS_PER_CHUNK,
         }
     }
 }
