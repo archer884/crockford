@@ -4,6 +4,7 @@ use std::result;
 
 pub type Result<T> = result::Result<T, Error>;
 
+/// Represents an error in decoding.
 #[derive(Debug)]
 pub struct Error {
     kind: Kind,
@@ -11,7 +12,7 @@ pub struct Error {
 }
 
 impl Error {
-    pub fn new(kind: Kind, message: &'static str) -> Error {
+    pub(crate) fn new(kind: Kind, message: &'static str) -> Error {
         Error { kind, message }
     }
 }
