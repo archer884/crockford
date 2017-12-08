@@ -29,8 +29,8 @@ Decoding is a two-step process. This is because you can feed any string to the d
 let x = crockford::decode("4zq");
 let y = crockford::decode("4ZQ");
 
-assert_eq!(5111, x.unwrap());
-assert_eq!(5111, y.unwrap());
+assert_eq!(5111, x?);
+assert_eq!(5111, y?);
 ```
 
 So, step one is to call the decode function. Step two is to match/verify/unwrap/throw away the output.
