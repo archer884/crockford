@@ -5,9 +5,7 @@ pub fn encode(input: u64) -> String {
     let mut fits: Vec<_> = FiveBitIterator::new(input).collect();
     let mut buf = String::new();
     while let Some(fit) = fits.pop() {
-        unsafe {
-            buf.push(*UPPERCASE_ENCODING.get_unchecked(fit as usize) as char);
-        }
+        buf.push(UPPERCASE_ENCODING[fit as usize] as char);
     }
     buf
 }
