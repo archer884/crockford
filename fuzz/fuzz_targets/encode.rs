@@ -4,14 +4,12 @@
 
 extern crate crockford;
 
-fuzz_target!(|data| {
-    use std::slice;
+fuzz_target!(|data: &[u8]| {
+    for chunk in data.chunks(8) {
+        let n = chunk.iter().fold(0u64, |a, &b| {
+            (a << 8) | u64::from(b)
+        });
 
-    let len = data.len() / 8;
-    let ptr = data.as_ptr() as *const u64;
-    let input = unsafe { slice::from_raw_parts(ptr, len) };
-
-    for &n in input {
         let _ = crockford::encode(n);
     }
 });
