@@ -3,12 +3,12 @@ use UPPERCASE_ENCODING;
 
 /// Encodes a `u64` value as a Crockford Base32-encoded string.
 pub fn encode(input: u64) -> String {
-    let mut fits: Vec<_> = FiveBitIterator::new(input).collect();
-    let mut buf = String::new();
-    while let Some(fit) = fits.pop() {
-        buf.push(UPPERCASE_ENCODING[fit as usize] as char);
-    }
-    buf
+    let fits: Vec<_> = FiveBitIterator::new(input).collect();
+    let buf = fits.iter().rev().map(|&fit| {
+        UPPERCASE_ENCODING[fit as usize]
+    }).collect();
+    // All bytes in UPPERCASE_ENCODING are valid ASCII
+    unsafe { String::from_utf8_unchecked(buf) }
 }
 
 #[cfg(test)]
