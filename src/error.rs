@@ -29,7 +29,7 @@ impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.kind {
             Kind::InvalidDigit(idx, digit) => {
-                write!(f, "{} Found at {}: {}", self.message, idx, digit)
+                write!(f, "{} Byte value {} at index {}", self.message, digit, idx)
             }
             _ => write!(f, "{}", self.message),
         }
