@@ -15,7 +15,9 @@ The spec supports the idea of check digits, but this library currently does not.
 Encoding is a one-step process.
 
 ```rust
-let x = crockford::encode(5111);
+use crockford::Encode;
+
+let x = String::encode(5111);
 assert_eq!("4ZQ", &*x);
 ```
 

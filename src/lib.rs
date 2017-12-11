@@ -1,22 +1,22 @@
 //! # Crockford
 //!
-//! This library is intended to provide an easy way to encode and decode identifiers 
-//! (large integers) as [Crockford-encoded](https://www.crockford.com/wrmg/base32.html) 
+//! This library is intended to provide an easy way to encode and decode identifiers
+//! (large integers) as [Crockford-encoded](https://www.crockford.com/wrmg/base32.html)
 //! strings. If you want to encode or decode arbitrary data,
 //! [another library](https://docs.rs/base32) is probably a better choice.
-//! 
+//!
 //! ## Encoding
-//! 
+//!
 //! Use the encode function to encode `u64` values into Crockford Base32-encoded strings. This
 //! operation cannot fail, so you will always get back a string rather than any kind of result
 //! value.
 //!
 //! ```rust
-//! let x = crockford::encode(5111);
+//! use crockford::Encode;
 //!
-//! assert_eq!("4ZQ", &*x);
+//! assert_eq!("4ZQ", String::encode(5111));
 //! ```
-//! 
+//!
 //! ## Decoding
 //!
 //! Use the decode function to decode Crockford Base32-encoded strings. This operation can fail;
@@ -41,7 +41,7 @@ mod iterator;
 mod encoding;
 mod decoding;
 
-pub use encoding::encode;
+pub use encoding::Encode;
 pub use decoding::decode;
 pub use error::Error;
 

@@ -3,6 +3,7 @@
 #[macro_use] extern crate libfuzzer_sys;
 
 extern crate crockford;
+use crockford::Encode;
 
 fuzz_target!(|data: &[u8]| {
     for chunk in data.chunks(8) {
@@ -10,6 +11,6 @@ fuzz_target!(|data: &[u8]| {
             (a << 8) | u64::from(b)
         });
 
-        let _ = crockford::encode(n);
+        let _ = String::encode(n);
     }
 });
