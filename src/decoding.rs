@@ -52,7 +52,6 @@ fn normalize_digits(s: &str) -> Result<Vec<u8>> {
 /// Attempts to convert an ascii digit to a normalized form.
 fn to_normal_digit(idx: usize, u: u8) -> Result<u8> {
     const INT_OFFSET: u8 = b'0';
-    const LOWERCASE_OFFSET: u8 = b'a' - b'A';
 
     match u {
         // Here, we opt for a slightly non-kosher behavior: we accept invalid letters such as
@@ -76,7 +75,7 @@ fn to_normal_digit(idx: usize, u: u8) -> Result<u8> {
         }
 
         u @ b'a'...b'z' => {
-            match UPPERCASE_ENCODING.binary_search(&(u - LOWERCASE_OFFSET)) {
+            match UPPERCASE_ENCODING.binary_search(&(u & !32)) {
                 Ok(idx) => Ok(idx as u8),
                 _ => unreachable!("C'mon, guys, I'm not kidding. This isn't possible."),
             }
