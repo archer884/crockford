@@ -1,19 +1,3 @@
-//! # croc
-//! 
-//! > Crockford Base32 converter
-//! 
-//! ## Usage
-//! 
-//! ```sh
-//! $ croc 251
-//! 7V
-//! ```
-//! 
-//! ```sh
-//! $ uncroc 7V
-//! 251
-//! ```
-
 extern crate crockford;
 
 fn main() {
