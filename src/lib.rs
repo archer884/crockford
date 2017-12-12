@@ -1,12 +1,12 @@
 //! # Crockford
 //!
-//! This library is intended to provide an easy way to encode and decode identifiers 
-//! (large integers) as [Crockford-encoded](https://www.crockford.com/wrmg/base32.html) 
+//! This library is intended to provide an easy way to encode and decode identifiers
+//! (large integers) as [Crockford-encoded](https://www.crockford.com/wrmg/base32.html)
 //! strings. If you want to encode or decode arbitrary data,
 //! [another library](https://docs.rs/base32) is probably a better choice.
-//! 
+//!
 //! ## Encoding
-//! 
+//!
 //! Use the encode function to encode `u64` values into Crockford Base32-encoded strings. This
 //! operation cannot fail, so you will always get back a string rather than any kind of result
 //! value.
@@ -16,13 +16,13 @@
 //!
 //! assert_eq!("4ZQ", &*x);
 //! ```
-//! 
+//!
 //! ### Faster encoding (aka "Plan B")
-//! 
+//!
 //! Because this is Rust, particular focus is given to runtime efficiency--or, at least, allowing
 //! the user to achieve runtime efficiency. As a result, we provide a second, more complicated
 //! encoding option.
-//! 
+//!
 //! ```rust
 //! # use crockford;
 //! # use std::str;
@@ -30,16 +30,16 @@
 //! // The longest possible representation of u64 is 13 digits.
 //! let mut buf = Vec::with_capacity(13);
 //! crockford::encode_into(5111, &mut buf);
-//! 
+//!
 //! let result = std::str::from_utf8(&buf)?;
 //! assert_eq!("4ZQ", result);
 //! # Ok(())
 //! # }
 //! ```
-//! 
+//!
 //! This `encode_into` method also accepts `&mut String`, although that is much less efficient
 //! because of the added UTF8 validation applied to strings.
-//! 
+//!
 //! ## Decoding
 //!
 //! Use the decode function to decode Crockford Base32-encoded strings. This operation can fail;

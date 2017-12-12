@@ -1,5 +1,5 @@
 /// Represents writable buffer capable of receiving encoded data.
-/// 
+///
 /// Write is implemented on `Vec<u8>` and `String`, but you are free to implement it on your own
 /// types. One conceivable purpose would be to allow for lowercase encoding output by inverting
 /// the cap bit before writing.
@@ -11,7 +11,9 @@ pub trait Write {
 impl Write for String {
     fn write(&mut self, u: u8) {
         // UPPERCASE_ENCODING contains only ASCII bytes.
-        unsafe { self.as_mut_vec().push(u); }
+        unsafe {
+            self.as_mut_vec().push(u);
+        }
     }
 }
 
@@ -32,7 +34,7 @@ pub fn encode(n: u64) -> String {
 }
 
 /// Encodes a `u64` value as Crockford Base32 and writes it to the provided output.
-/// 
+///
 /// Either `String` or `Vec<u8>` will be accepted.
 pub fn encode_into<T: Write>(mut n: u64, w: &mut T) {
     use UPPERCASE_ENCODING;
