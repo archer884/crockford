@@ -37,8 +37,7 @@
 //! # }
 //! ```
 //!
-//! This `encode_into` method also accepts `&mut String`, although that is much less efficient
-//! because of the added UTF8 validation applied to strings.
+//! This `encode_into` method also accepts `&mut String`, if you prefer.
 //!
 //! ## Decoding
 //!

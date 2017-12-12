@@ -34,7 +34,7 @@ let result = std::str::from_utf8(&buf)?;
 assert_eq!("4ZQ", result);
 ```
 
-This `encode_into` method also accepts `&mut String`, although this is far less efficient than using a `Vec<u8>` because of the added UTF8 validation applied to strings.
+This `encode_into` method also accepts `&mut String`, if you prefer.
 
 ### Decoding
 
