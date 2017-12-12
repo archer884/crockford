@@ -19,7 +19,22 @@ let x = crockford::encode(5111);
 assert_eq!("4ZQ", &*x);
 ```
 
-If you want lowercase, then... Well, tough. The library does not support that yet. If you want to encode to a buffer of your choice rather than a new one created in the function, that's also tough. Pull requests are welcome, but I have not been able to decide the best way to provide these additional features just yet.
+If you want lowercase, then... Well, tough. However, we do now support encoding to a buffer of your choice rather than a new one created in the function. Read on to learn about plan B...
+
+#### Plan B (faster encoding)
+
+Because this is Rust, particular focus is given to runtime efficiency--or, at least, allowing the user to achieve runtime efficiency. As a result, we provide a second, more complicated encoding option.
+
+```rust
+// The longest possible representation of u64 is 13 digits.
+let mut buf = Vec::with_capacity(13);
+crockford::encode_into(5111, &mut buf);
+
+let result = std::str::from_utf8(&buf)?;
+assert_eq!("4ZQ", result);
+```
+
+This `encode_into` method also accepts `&mut String`, although this is far less efficient than using a `Vec<u8>` because of the added UTF8 validation applied to strings.
 
 ### Decoding
 

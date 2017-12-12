@@ -17,6 +17,29 @@
 //! assert_eq!("4ZQ", &*x);
 //! ```
 //! 
+//! ### Faster encoding (aka "Plan B")
+//! 
+//! Because this is Rust, particular focus is given to runtime efficiency--or, at least, allowing
+//! the user to achieve runtime efficiency. As a result, we provide a second, more complicated
+//! encoding option.
+//! 
+//! ```rust
+//! # use crockford;
+//! # use std::str;
+//! # fn run() -> Result<(), str::Utf8Error> {
+//! // The longest possible representation of u64 is 13 digits.
+//! let mut buf = Vec::with_capacity(13);
+//! crockford::encode_into(5111, &mut buf);
+//! 
+//! let result = std::str::from_utf8(&buf)?;
+//! assert_eq!("4ZQ", result);
+//! # Ok(())
+//! # }
+//! ```
+//! 
+//! This `encode_into` method also accepts `&mut String`, although that is much less efficient
+//! because of the added UTF8 validation applied to strings.
+//! 
 //! ## Decoding
 //!
 //! Use the decode function to decode Crockford Base32-encoded strings. This operation can fail;
@@ -35,13 +58,11 @@
 //! # run().unwrap()
 //! ```
 
-mod error;
-mod iterator;
-
 mod encoding;
+mod error;
 mod decoding;
 
-pub use encoding::encode;
+pub use encoding::*;
 pub use decoding::decode;
 pub use error::Error;
 
