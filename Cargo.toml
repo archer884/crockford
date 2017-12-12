@@ -3,8 +3,16 @@ name = "crockford"
 version = "1.0.0-beta.2"
 authors = ["J/A <archer884@gmail.com>"]
 license = "MIT/Apache-2.0"
+documentation = "https://docs.rs/crockford"
+homepage = "https://github.com/archer884/crockford"
+repository = "https://github.com/archer884/crockford"
+keywords = ["crockford", "base32"]
+categories = ["encoding", "parsing", "value-formatting", "web-programming"]
 description = """
 Provides Crockford Base32 encoding for identifiers (e.g. u64 values).
 """
+
+[badges]
+travis-ci = { repository = "archer884/crockford" }
 
 [dependencies]
