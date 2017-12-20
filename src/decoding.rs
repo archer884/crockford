@@ -1,7 +1,7 @@
 use error::*;
 use UPPERCASE_ENCODING;
 
-const BASE: u64 = 32;
+const BASE: u64 = 0x20;
 
 /// Attempts to decode a Crockford Base32-encoded string into a `u64` value.
 pub fn decode<T: AsRef<str>>(input: T) -> Result<u64> {
@@ -12,39 +12,23 @@ pub fn decode<T: AsRef<str>>(input: T) -> Result<u64> {
             "Encoded input string is empty.",
         )),
         n if n > 13 => Err(Error::new(Kind::OutOfRange, "Encoded value is too large")),
-        _ => match normalize_digits(input) {
-            Err(e) => Err(e),
-            Ok(digits) => {
-                let mut n = 0;
-                let mut base = Some(1);
+        _ => {
+            let values = input
+                .bytes()
+                .enumerate()
+                .map(|(idx, u)| to_normal_digit(idx, u));
 
-                for &value in digits.iter().rev() {
-                    match base {
-                        Some(x) => {
-                            n += u64::from(value).wrapping_mul(x);
-                            base = x.checked_mul(BASE);
-                        }
+            let mut place = BASE.pow(input.len() as u32 - 1);
+            let mut n = 0;
 
-                        None => {
-                            return Err(Error::new(
-                                Kind::OutOfRange,
-                                "The encoded value is too large.",
-                            ))
-                        }
-                    }
-                }
-
-                Ok(n)
+            for value in values {
+                n += u64::from(value?).wrapping_mul(place);
+                place /= BASE;
             }
-        },
-    }
-}
 
-fn normalize_digits(s: &str) -> Result<Vec<u8>> {
-    s.bytes()
-        .enumerate()
-        .map(|(i, u)| to_normal_digit(i, u))
-        .collect()
+            Ok(n)
+        }
+    }
 }
 
 /// Attempts to convert an ascii digit to a normalized form.
