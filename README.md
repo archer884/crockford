@@ -63,6 +63,17 @@ at your option.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
 
+#### Fuzzing
+
+When tinkering with encoding or decoding, it may be helpful to throw new changes at the fuzzer. This has only been tested on macOS, but the commands are:
+
+```
+cargo fuzz run encode
+cargo fuzz run decode
+```
+
+The fuzzer can be pretty good at making up nonsensical test cases for invalid data.
+
 [travis-image]: https://travis-ci.org/archer884/crockford.svg?branch=master
 [travis-url]: https://travis-ci.org/archer884/crockford
 
