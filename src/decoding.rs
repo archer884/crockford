@@ -23,6 +23,8 @@ pub fn decode<T: AsRef<str>>(input: T) -> Result<u64> {
 
             for value in values {
                 n += u64::from(value?).wrapping_mul(place);
+
+                // This compiles to >>= 5
                 place /= BASE;
             }
 
