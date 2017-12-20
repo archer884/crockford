@@ -13,16 +13,12 @@ pub fn decode<T: AsRef<str>>(input: T) -> Result<u64> {
         )),
         n if n > 13 => Err(Error::new(Kind::OutOfRange, "Encoded value is too large")),
         _ => {
-            let values = input
-                .bytes()
-                .enumerate()
-                .map(|(idx, u)| to_normal_digit(idx, u));
-
             let mut place = BASE.pow(input.len() as u32 - 1);
             let mut n = 0;
 
-            for value in values {
-                n += u64::from(value?).wrapping_mul(place);
+            for (idx, u) in input.bytes().enumerate() {
+                let digit = to_normal_digit(idx, u)?;
+                n += u64::from(digit).wrapping_mul(place);
 
                 // This compiles to >>= 5
                 place /= BASE;
