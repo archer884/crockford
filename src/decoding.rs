@@ -47,20 +47,13 @@ fn to_normal_digit(idx: usize, u: u8) -> Result<u8> {
         )),
 
         u @ b'0'...b'9' => Ok(u - INT_OFFSET),
-        u @ b'A'...b'Z' => match UPPERCASE_ENCODING.binary_search(&u) {
+        u => match UPPERCASE_ENCODING.binary_search(&(u & !32)) {
             Ok(idx) => Ok(idx as u8),
-            _ => unreachable!("Seriously, if you got here, there is a problem."),
+            _ => Err(Error::new(
+                Kind::InvalidDigit(idx, u),
+                "Invalid encoded digit.",
+            )),
         },
-
-        u @ b'a'...b'z' => match UPPERCASE_ENCODING.binary_search(&(u & !32)) {
-            Ok(idx) => Ok(idx as u8),
-            _ => unreachable!("C'mon, guys, I'm not kidding. This isn't possible."),
-        },
-
-        _ => Err(Error::new(
-            Kind::InvalidDigit(idx, u),
-            "Invalid encoded digit.",
-        )),
     }
 }
 
