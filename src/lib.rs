@@ -57,6 +57,10 @@
 //! # run().unwrap()
 //! ```
 
+#![feature(test)]
+
+extern crate test;
+
 mod encoding;
 mod error;
 mod decoding;
