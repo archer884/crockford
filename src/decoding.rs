@@ -147,3 +147,28 @@ mod tests {
         assert!(decode("iVUv").is_err());
     }
 }
+
+#[cfg(test)]
+mod benchmarks {
+    use test::{self, Bencher};
+
+    #[bench]
+    fn fzq(b: &mut Bencher) {
+        b.iter(|| test::black_box(super::decode("fzq").unwrap()));
+    }
+
+    #[bench]
+    fn fzq_uppercase(b: &mut Bencher) {
+        b.iter(|| test::black_box(super::decode("FZQ").unwrap()));
+    }
+
+    #[bench]
+    fn fzzzzzzzzzzzz(b: &mut Bencher) {
+        b.iter(|| test::black_box(super::decode("fzzzzzzzzzzzz").unwrap()));
+    }
+
+    #[bench]
+    fn fzzzzzzzzzzzz_uppercase(b: &mut Bencher) {
+        b.iter(|| test::black_box(super::decode("FZZZZZZZZZZZZ").unwrap()));
+    }
+}
