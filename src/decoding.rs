@@ -100,90 +100,38 @@ mod tests {
 
     #[test]
     fn large_values_become_large_values() {
-        let input = "1ZZZ";
-        let expected = Ok(65535);
-        let actual = decode(input);
-
-        assert_eq!(expected, actual);
+        assert_eq!(Ok(65535), decode("1zzz"));
+        assert_eq!(Ok(65535), decode("1ZZZ"));
     }
 
     #[test]
-    fn lowercase_large_values_become_large_values() {
-        let input = "1zzz";
-        let expected = Ok(65535);
-        let actual = decode(input);
-
-        assert_eq!(expected, actual);
+    fn map_to_0() {
+        assert_eq!(Ok(0), decode("O"));
+        assert_eq!(Ok(0), decode("o"));
     }
 
     #[test]
-    fn lowercase_o_becomes_zero() {
-        let input = "o";
-        let expected = Ok(0);
-        let actual = decode(input);
-
-        assert_eq!(expected, actual);
+    fn map_to_1() {
+        assert_eq!(Ok(1), decode("I"));
+        assert_eq!(Ok(1), decode("i"));
+        assert_eq!(Ok(1), decode("L"));
+        assert_eq!(Ok(1), decode("l"));
     }
 
     #[test]
-    fn uppercase_o_becomes_zero() {
-        let input = "O";
-        let expected = Ok(0);
-        let actual = decode(input);
-
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn lowercase_i_becomes_one() {
-        let input = "i";
-        let expected = Ok(1);
-        let actual = decode(input);
-
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn uppercase_i_becomes_one() {
-        let input = "I";
-        let expected = Ok(1);
-        let actual = decode(input);
-
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn lowercase_l_becomes_one() {
-        let input = "l";
-        let expected = Ok(1);
-        let actual = decode(input);
-
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn uppercase_l_becomes_one() {
-        let input = "L";
-        let expected = Ok(1);
-        let actual = decode(input);
-
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn zee_equals_31() {
+    fn z_equals_31() {
         assert_eq!(Ok(31), decode("z"));
         assert_eq!(Ok(31), decode("Z"));
     }
 
     #[test]
-    fn queue_equals_23() {
+    fn q_equals_23() {
         assert_eq!(Ok(23), decode("q"));
         assert_eq!(Ok(23), decode("Q"));
     }
 
     #[test]
-    fn four_zee_queue_works() {
+    fn four_z_q_works() {
         assert_eq!(Ok(5111), decode("4zq"));
         assert_eq!(Ok(5111), decode("4ZQ"));
     }
