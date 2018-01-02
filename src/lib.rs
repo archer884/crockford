@@ -65,6 +65,8 @@ mod encoding;
 mod error;
 mod decoding;
 
+pub mod format;
+
 pub use encoding::*;
 pub use decoding::decode;
 pub use error::Error;

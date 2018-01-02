@@ -1,0 +1,108 @@
+use encoding;
+use std::fmt;
+
+#[derive(Copy, Clone, Debug)]
+pub enum Case {
+    Upper,
+    Lower,
+}
+
+impl Case {
+    fn is_uppercase(&self) -> bool {
+        match *self {
+            Case::Upper => true,
+            Case::Lower => false,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct Encoder {
+    case: Case,
+}
+
+impl Encoder {
+    pub fn new() -> Self {
+        Self { case: Case::Lower }
+    }
+
+    pub fn with_case(case: Case) -> Self {
+        Self { case }
+    }
+
+    pub fn encode(&self, n: u64) -> Formatter {
+        let mut f = Formatter::new(self);
+        encoding::encode_into(n, &mut f);
+        f
+    }
+}
+
+impl Default for Encoder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+pub struct Formatter<'e> {
+    encoder: &'e Encoder,
+    len: usize,
+    data: [u8; 13],
+}
+
+impl<'e> Formatter<'e> {
+    pub fn new(encoder: &'e Encoder) -> Self {
+        Formatter {
+            encoder,
+            len: 0,
+            data: [0; 13],
+        }
+    }
+}
+
+impl<'e> encoding::Write for Formatter<'e> {
+    fn write(&mut self, mut u: u8) {
+        // FIXME: I believe this kind of transformation should be performed if and when the
+        // formatter is realized rather than at write time. When we're writing, we should only
+        // be writing.
+        if !self.encoder.case.is_uppercase() {
+            u = u.to_ascii_lowercase();
+        }
+
+        // I'm not going to do an explicit bounds check here because #encode_into won't attempt to
+        // write more than 13 bytes here. If you employ the #Write trait and then do the #left 
+        // thing with it, that's your problem. Anyway, this isn't memory unsafe because indexed
+        // access is implicitly checked, and you'll just get a panic if you try any dumbfuckery.
+        self.data[self.len] = u;
+        self.len += 1;
+    }
+}
+
+impl<'e> fmt::Display for Formatter<'e> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for i in 0..self.len {
+            write!(f, "{}", self.data[i] as char)?;
+        }
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn lowercase_encoder_works() {
+        let encoder = Encoder::new();
+        let result = encoder.encode(5111);
+
+        assert_eq!("4zq", &*result.to_string());
+    }
+
+    #[test]
+    fn uppercase_encoder_works() {
+        let encoder = Encoder::with_case(Case::Upper);
+        let result = encoder.encode(5111);
+
+        assert_eq!("4ZQ", &*result.to_string());
+    }
+}
