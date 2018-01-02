@@ -17,8 +17,15 @@ impl Case {
 }
 
 #[derive(Debug)]
+/// An encoder with formatting options.
+/// 
+/// Values encoded using an instance of `Encoder` will be formatted with respect to the options
+/// provided, e.g. capitalization, grouping of digits, and so forth.
+/// 
+/// Note: all fields of `Encoder` are public. This is to allow for the use of an instance of
+/// `Encoder` as constant or static.
 pub struct Encoder {
-    case: Case,
+    pub case: Case,
 }
 
 impl Encoder {
