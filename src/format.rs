@@ -7,34 +7,25 @@ pub enum Case {
     Lower,
 }
 
-impl Case {
-    fn is_uppercase(&self) -> bool {
-        match *self {
-            Case::Upper => true,
-            Case::Lower => false,
-        }
-    }
-}
-
 #[derive(Debug)]
 /// An encoder with formatting options.
 /// 
 /// Values encoded using an instance of `Encoder` will be formatted with respect to the options
 /// provided, e.g. capitalization, grouping of digits, and so forth.
-/// 
-/// Note: all fields of `Encoder` are public. This is to allow for the use of an instance of
-/// `Encoder` as constant or static.
-pub struct Encoder {
-    pub case: Case,
-}
+pub struct Encoder { transform: fn(u8) -> u8 }
 
 impl Encoder {
     pub fn new() -> Self {
-        Self { case: Case::Lower }
+        Self { transform: |u| u }
     }
 
     pub fn with_case(case: Case) -> Self {
-        Self { case }
+        let transform = match case {
+            Case::Upper => (|u| (u as char).to_ascii_uppercase() as u8) as fn(u8) -> u8,
+            Case::Lower => (|u| (u as char).to_ascii_lowercase() as u8) as fn(u8) -> u8,
+        };
+        
+        Self { transform }
     }
 
     pub fn encode(&self, n: u64) -> Formatter {
@@ -71,9 +62,7 @@ impl<'e> encoding::Write for Formatter<'e> {
         // FIXME: I believe this kind of transformation should be performed if and when the
         // formatter is realized rather than at write time. When we're writing, we should only
         // be writing.
-        if !self.encoder.case.is_uppercase() {
-            u = u.to_ascii_lowercase();
-        }
+        u = (self.encoder.transform)(u);
 
         // I'm not going to do an explicit bounds check here because #encode_into won't attempt to
         // write more than 13 bytes here. If you employ the #Write trait and then do the #left 
