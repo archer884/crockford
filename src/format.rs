@@ -1,5 +1,4 @@
 use encoding;
-use std::fmt;
 
 #[derive(Copy, Clone, Debug)]
 pub enum Case {
@@ -55,6 +54,14 @@ impl<'e> Formatter<'e> {
             data: [0; 13],
         }
     }
+
+    pub fn render(&self) -> String {
+        let mut s = String::with_capacity(self.len);
+        for idx in 0..self.len {
+            s.push(self.data[idx] as char);
+        }
+        s
+    }
 }
 
 impl<'e> encoding::Write for Formatter<'e> {
@@ -73,15 +80,6 @@ impl<'e> encoding::Write for Formatter<'e> {
     }
 }
 
-impl<'e> fmt::Display for Formatter<'e> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for i in 0..self.len {
-            write!(f, "{}", self.data[i] as char)?;
-        }
-        Ok(())
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -91,7 +89,7 @@ mod tests {
         let encoder = Encoder::new();
         let result = encoder.encode(5111);
 
-        assert_eq!("4zq", &*result.to_string());
+        assert_eq!("4zq", &*result.render());
     }
 
     #[test]
@@ -99,6 +97,6 @@ mod tests {
         let encoder = Encoder::with_case(Case::Upper);
         let result = encoder.encode(5111);
 
-        assert_eq!("4ZQ", &*result.to_string());
+        assert_eq!("4ZQ", &*result.render());
     }
 }
