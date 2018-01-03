@@ -31,7 +31,7 @@ impl Command {
 
             // If the user does not select a subcommand, assume they mean to encode something.
             // If not... Meh.
-            foo => Some(Command::Encode(foo.parse().ok()?)),
+            other => Some(Command::Encode(other.parse().ok()?)),
         }
     }
 }
