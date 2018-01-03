@@ -17,10 +17,10 @@ impl Case {
 
 #[derive(Debug)]
 /// An encoder with formatting options.
-/// 
+///
 /// Values encoded using an instance of `Encoder` will be formatted with respect to the options
 /// provided, e.g. capitalization, grouping of digits, and so forth.
-/// 
+///
 /// Note: all fields of `Encoder` are public. This is to allow for the use of an instance of
 /// `Encoder` as constant or static.
 pub struct Encoder {
@@ -71,6 +71,12 @@ impl<'e> Formatter<'e> {
         }
         s
     }
+
+    pub fn render_into<W: encoding::Write>(&self, w: &mut W) {
+        for idx in 0..self.len {
+            w.write(self.data[idx]);
+        }
+    }
 }
 
 impl<'e> encoding::Write for Formatter<'e> {
@@ -83,7 +89,7 @@ impl<'e> encoding::Write for Formatter<'e> {
         }
 
         // I'm not going to do an explicit bounds check here because #encode_into won't attempt to
-        // write more than 13 bytes here. If you employ the #Write trait and then do the #left 
+        // write more than 13 bytes here. If you employ the #Write trait and then do the #left
         // thing with it, that's your problem. Anyway, this isn't memory unsafe because indexed
         // access is implicitly checked, and you'll just get a panic if you try any dumbfuckery.
         self.data[self.len] = u;
@@ -100,6 +106,10 @@ mod tests {
         let encoder = Encoder::new();
         let result = encoder.encode(5111);
 
+        let mut s = String::new();
+        result.render_into(&mut s);
+
+        assert_eq!("4zq", &*s);
         assert_eq!("4zq", &*result.render());
     }
 
@@ -108,6 +118,10 @@ mod tests {
         let encoder = Encoder::with_case(Case::Upper);
         let result = encoder.encode(5111);
 
+        let mut s = String::new();
+        result.render_into(&mut s);
+
+        assert_eq!("4ZQ", &*s);
         assert_eq!("4ZQ", &*result.render());
     }
 }
