@@ -125,3 +125,33 @@ mod tests {
         assert_eq!("4ZQ", &*result.render());
     }
 }
+
+#[cfg(test)]
+mod benchmarks {
+    use super::*;
+    use test::{self, Bencher};
+
+    #[bench]
+    fn encode_5111(b: &mut Bencher) {
+        let encoder = Encoder::with_case(Case::Lower);
+        b.iter(|| test::black_box(encoder.encode(5111)));
+    }
+
+    #[bench]
+    fn encode_18446744073709551615(b: &mut Bencher) {
+        let encoder = Encoder::with_case(Case::Lower);
+        b.iter(|| test::black_box(encoder.encode(18446744073709551615)));
+    }
+
+    #[bench]
+    fn encode_5111_with_to_string(b: &mut Bencher) {
+        let encoder = Encoder::with_case(Case::Lower);
+        b.iter(|| test::black_box(encoder.encode(5111).render()));
+    }
+
+    #[bench]
+    fn encode_18446744073709551615_with_to_string(b: &mut Bencher) {
+        let encoder = Encoder::with_case(Case::Lower);
+        b.iter(|| test::black_box(encoder.encode(18446744073709551615).render()));
+    }
+}
