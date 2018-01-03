@@ -169,3 +169,20 @@ mod tests {
         }
     }
 }
+
+
+#[cfg(test)]
+mod benchmarks {
+    use super::*;
+    use test::{self, Bencher};
+
+    #[bench]
+    fn encode_5111(b: &mut Bencher) {
+        b.iter(|| test::black_box(encode(5111)));
+    }
+
+    #[bench]
+    fn encode_18446744073709551615(b: &mut Bencher) {
+        b.iter(|| test::black_box(encode(18446744073709551615)));
+    }
+}
