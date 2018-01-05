@@ -34,8 +34,6 @@ fn to_normal_digit(idx: usize, u: u8) -> Result<u8> {
     const INT_OFFSET: u8 = b'0';
 
     match u {
-        // Here, we opt for a slightly non-kosher behavior: we accept invalid letters such as
-        // i, I, l, L, o, and O, but we convert them into zero or one.
         b'O' | b'o' => Ok(0),
         b'I' | b'i' | b'L' | b'l' => Ok(1),
 
