@@ -1,5 +1,4 @@
 use error::*;
-use UPPERCASE_ENCODING;
 
 const BASE: u64 = 0x20;
 
@@ -31,27 +30,33 @@ pub fn decode<T: AsRef<str>>(input: T) -> Result<u64> {
 
 /// Attempts to convert an ascii digit to a normalized form.
 fn to_normal_digit(idx: usize, u: u8) -> Result<u8> {
-    const INT_OFFSET: u8 = b'0';
+    static VALUE_MAPPING: [i8; 256] = [
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, -1, -1, -1, -1, -1, -1, -1, 10, 11, 12, 13, 14, 15,
+        16, 17, 1, 18, 19, 1, 20, 21, 0, 22, 23, 24, 25, 26, -2, 27, 28, 29, 30, 31, -1, -1, -1,
+        -1, -1, -1, 10, 11, 12, 13, 14, 15, 16, 17, 1, 18, 19, 1, 20, 21, 0, 22, 23, 24, 25, 26,
+        -2, 27, 28, 29, 30, 31, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1,
+    ];
 
-    match u {
-        b'O' | b'o' => Ok(0),
-        b'I' | b'i' | b'L' | b'l' => Ok(1),
-
-        // U and u are relegated to use in the implementation of check digits because their
-        // presence is otherwise prone to producing accidentally obscene strings.
-        b'U' | b'u' => Err(Error::new(
-            Kind::CheckDigitUnsupported(idx, u),
-            "Check digits not currently supported.",
-        )),
-
-        u @ b'0'...b'9' => Ok(u - INT_OFFSET),
-        u => match UPPERCASE_ENCODING.binary_search(&(u & !32)) {
-            Ok(idx) => Ok(idx as u8),
-            _ => Err(Error::new(
+    unsafe {
+        match *VALUE_MAPPING.get_unchecked(u as usize) {
+            -1 => Err(Error::new(
                 Kind::InvalidDigit(idx, u),
                 "Invalid encoded digit.",
             )),
-        },
+            -2 => Err(Error::new(
+                Kind::CheckDigitUnsupported(idx, u),
+                "Check digits not currently supported.",
+            )),
+            result => Ok(result as u8),
+        }
     }
 }
 
