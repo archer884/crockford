@@ -1,6 +1,6 @@
 # crockford [![Build Status][travis-image]][travis-url]
 
-> Rust Crockford encoding for u64
+> Base32 encoding for 64-bit values.
 
 [Crockford Base32 Encoding](https://www.crockford.com/wrmg/base32.html) is most commonly used to make numeric identifiers slightly more user-resistant. Similar to [Hashids](http://hashids.org/), the purpose here is to make the identifiers shorter and less confusing. Unlike Hashids, Crockford Base32 does nothing to conceal the real value of the number (beyond the actual encoding, anyway) and the fact that they are sequential is still pretty obvious when you see consecutive identifiers side by side.
 
