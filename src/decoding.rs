@@ -18,9 +18,7 @@ pub fn decode<T: AsRef<str>>(input: T) -> Result<u64> {
             for (idx, u) in input.bytes().enumerate() {
                 let digit = to_normal_digit(idx, u)?;
                 n += u64::from(digit).wrapping_mul(place);
-
-                // This compiles to >>= 5
-                place /= BASE;
+                place >>= 5;
             }
 
             Ok(n)
