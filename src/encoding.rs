@@ -39,16 +39,18 @@ pub fn encode(n: u64) -> String {
 pub fn encode_into<T: Write>(mut n: u64, w: &mut T) {
     use UPPERCASE_ENCODING;
 
+    // Used for the initial shift.
+    const QUAD_SHIFT: usize = 60;
+    const QUAD_RESET: usize = 4;
+
+    // Used for all subsequent shifts.
+    const FIVE_SHIFT: usize = 59;
+    const FIVE_RESET: usize = 5;
+
     // After we clear the four most significant bits, the four least significant bits will be
     // replaced with 0001. We can then know to stop once the four most significant bits are,
     // likewise, 0001.
     const STOP_BIT: u64 = 1 << QUAD_SHIFT;
-
-    const QUAD_SHIFT: usize = 60;
-    const QUAD_RESET: usize = 4;
-
-    const FIVE_SHIFT: usize = 59;
-    const FIVE_RESET: usize = 5;
 
     if n == 0 {
         w.write(b'0');
