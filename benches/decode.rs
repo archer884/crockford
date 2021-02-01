@@ -1,26 +1,23 @@
-#![feature(test)]
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
-extern crate crockford;
-extern crate test;
+fn decode_benchmark(c: &mut Criterion) {
+    c.bench_function("decode fzq", |b| {
+        b.iter(|| crockford::decode(black_box("fzq")))
+    });
 
-use test::Bencher;
+    c.bench_function("decode fzq upper", |b| {
+        b.iter(|| crockford::decode(black_box("FZQ")))
+    });
 
-#[bench]
-fn fzq(b: &mut Bencher) {
-    b.iter(|| test::black_box(crockford::decode("fzq")));
+    c.bench_function("decode fzzlong", |b| {
+        b.iter(|| crockford::decode(black_box("fzzzzzzzzzzzz")))
+    });
+
+    c.bench_function("decode fzzlong upper", |b| {
+        b.iter(|| crockford::decode(black_box("FZZZZZZZZZZZZ")))
+    });
 }
 
-#[bench]
-fn fzq_uppercase(b: &mut Bencher) {
-    b.iter(|| test::black_box(crockford::decode("FZQ")));
-}
+criterion_group!(decode, decode_benchmark);
 
-#[bench]
-fn fzzzzzzzzzzzz(b: &mut Bencher) {
-    b.iter(|| test::black_box(crockford::decode("fzzzzzzzzzzzz")));
-}
-
-#[bench]
-fn fzzzzzzzzzzzz_uppercase(b: &mut Bencher) {
-    b.iter(|| test::black_box(crockford::decode("FZZZZZZZZZZZZ")));
-}
+criterion_main!(decode);

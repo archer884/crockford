@@ -1,35 +1,31 @@
-#![feature(test)]
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
-extern crate crockford;
-extern crate test;
+fn encode_benchmark(c: &mut Criterion) {
+    c.bench_function("encode 5111", |b| {
+        b.iter(|| crockford::encode(black_box(5111)))
+    });
 
-use test::Bencher;
+    c.bench_function("encode 184long", |b| {
+        b.iter(|| crockford::encode(black_box(18446744073709551615)))
+    });
 
-#[bench]
-fn encode_5111(b: &mut Bencher) {
-    b.iter(|| test::black_box(crockford::encode(5111)));
-}
+    c.bench_function("encode into 5111", |b| {
+        let mut buffer = String::with_capacity(13);
+        b.iter(|| {
+            buffer.clear();
+            crockford::encode_into(black_box(5111), &mut buffer);
+        })
+    });
 
-#[bench]
-fn encode_18446744073709551615(b: &mut Bencher) {
-    b.iter(|| test::black_box(crockford::encode(18446744073709551615)));
-}
-
-#[bench]
-fn encode_into_5111(b: &mut Bencher) {
-    let mut buffer = String::with_capacity(13);
-    b.iter(|| {
-        buffer.clear();
-        test::black_box(crockford::encode_into(5111, &mut buffer));
+    c.bench_function("encode into 184long", |b| {
+        let mut buffer = String::with_capacity(13);
+        b.iter(|| {
+            buffer.clear();
+            crockford::encode_into(black_box(18446744073709551615), &mut buffer);
+        })
     });
 }
 
-#[bench]
-fn encode_into_18446744073709551615(b: &mut Bencher) {
-    let mut buffer = String::with_capacity(13);
-    b.iter(|| {
-        buffer.clear();
-        test::black_box(crockford::encode_into(18446744073709551615, &mut buffer));
-    });
-}
+criterion_group!(encode, encode_benchmark);
 
+criterion_main!(encode);
