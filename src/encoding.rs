@@ -37,7 +37,7 @@ pub fn encode(n: u64) -> String {
 ///
 /// Either `String` or `Vec<u8>` will be accepted.
 pub fn encode_into<T: Write>(mut n: u64, w: &mut T) {
-    use UPPERCASE_ENCODING;
+    use crate::UPPERCASE_ENCODING;
 
     // Used for the initial shift.
     const QUAD_SHIFT: usize = 60;
@@ -87,7 +87,9 @@ pub fn encode_into<T: Write>(mut n: u64, w: &mut T) {
 
 #[cfg(test)]
 mod tests {
-    use encoding::*;
+    use std::str;
+
+    use crate::{decode, encode, encode_into};
 
     #[test]
     fn zero_returns_zero() {
@@ -119,8 +121,6 @@ mod tests {
 
     #[test]
     fn large_odd_number() {
-        use decoding::decode;
-
         // No, this is not a joke.
         let x = 0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001;
         let y = decode(encode(x)).unwrap();
@@ -130,8 +130,6 @@ mod tests {
 
     #[test]
     fn large_even_number() {
-        use decoding::decode;
-
         // No, this is not a joke.
         let x = 0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000;
         let y = decode(encode(x)).unwrap();
@@ -141,8 +139,6 @@ mod tests {
 
     #[test]
     fn tiny_number() {
-        use decoding::decode;
-
         let x = 1;
         let y = decode(encode(x)).unwrap();
 
@@ -153,9 +149,6 @@ mod tests {
     #[ignore]
     #[test]
     fn round_trips() {
-        use decoding::decode;
-        use std::str;
-
         let mut s = Vec::new();
 
         for n in 0..20_000_001 {

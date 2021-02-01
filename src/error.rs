@@ -1,8 +1,4 @@
-use std::error;
-use std::fmt;
-use std::result;
-
-pub type Result<T> = result::Result<T, Error>;
+use std::{error, fmt};
 
 /// Represents an error in decoding.
 #[derive(Debug)]
@@ -19,10 +15,10 @@ impl Error {
 
 #[derive(Debug)]
 pub enum Kind {
-    EmptyString,
-    OutOfRange,
-    InvalidDigit(usize, u8),
     CheckDigitUnsupported(usize, u8),
+    EmptyString,
+    InvalidDigit(usize, u8),
+    OutOfRange,
 }
 
 impl fmt::Display for Error {
@@ -36,17 +32,13 @@ impl fmt::Display for Error {
     }
 }
 
-impl error::Error for Error {
-    fn description(&self) -> &str {
-        self.message
-    }
-}
+impl error::Error for Error {}
 
 #[cfg(test)]
 impl PartialEq for Error {
     fn eq(&self, other: &Error) -> bool {
         fn kind_value(kind: &Kind) -> i32 {
-            match *kind {
+            match kind {
                 Kind::EmptyString => 1,
                 Kind::OutOfRange => 2,
                 Kind::InvalidDigit(..) => 3,

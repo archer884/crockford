@@ -1,4 +1,4 @@
-use error::*;
+use crate::{error::Kind, Error, Result};
 
 const BASE: u64 = 0x20;
 
@@ -10,7 +10,9 @@ pub fn decode<T: AsRef<str>>(input: T) -> Result<u64> {
             Kind::EmptyString,
             "Encoded input string is empty.",
         )),
+
         n if n > 13 => Err(Error::new(Kind::OutOfRange, "Encoded value is too large")),
+
         _ => {
             let mut place = BASE.pow(input.len() as u32 - 1);
             let mut n = 0;
@@ -31,24 +33,25 @@ fn to_normal_digit(idx: usize, u: u8) -> Result<u8> {
     static VALUE_MAPPING: [i8; 256] = include!("../resources/u8-mapping.txt");
 
     unsafe {
-        match *VALUE_MAPPING.get_unchecked(u as usize) {
+        match VALUE_MAPPING.get_unchecked(u as usize) {
             -1 => Err(Error::new(
                 Kind::InvalidDigit(idx, u),
                 "Invalid encoded digit.",
             )),
+
             -2 => Err(Error::new(
                 Kind::CheckDigitUnsupported(idx, u),
                 "Check digits not currently supported.",
             )),
-            result => Ok(result as u8),
+
+            &result => Ok(result as u8),
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use decoding::decode;
-    use error::*;
+    use crate::{decode, error::Kind, Error};
 
     #[test]
     fn zero_length_strings_fail() {

@@ -1,5 +1,3 @@
-extern crate crockford;
-
 fn main() {
     match Command::from_args() {
         Some(Command::Encode(n)) => println!("{}", crockford::encode(n)),
