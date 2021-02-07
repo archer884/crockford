@@ -50,19 +50,6 @@ assert_eq!(5111, y?);
 
 So, step one is to call the decode function. Step two is to match/verify/unwrap/throw away the output.
 
-### Development
-
-> Mostly a note on fuzzing to supplement my own memory...
-
-When tinkering with encoding or decoding, it may be helpful to throw new changes at the fuzzer. This has only been tested on macOS, but the commands are:
-
-```
-cargo fuzz run encode
-cargo fuzz run decode
-```
-
-The fuzzer can be pretty good at making up nonsensical test cases for invalid data.
-
 ## License
 
 Licensed under either of
