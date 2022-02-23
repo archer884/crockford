@@ -68,3 +68,29 @@ pub use error::Error;
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 static UPPERCASE_ENCODING: &[u8] = b"0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+
+/// Represents writable buffer capable of receiving encoded data.
+///
+/// Write is implemented on `Vec<u8>` and `String`, but you are free to
+/// implement it on your own types. One conceivable purpose would be to
+/// allow for lowercase encoding output by inverting the cap bit before
+/// writing.
+pub trait Write {
+    /// Push a digit onto the buffer.
+    fn write(&mut self, u: u8);
+}
+
+impl Write for Vec<u8> {
+    fn write(&mut self, u: u8) {
+        self.push(u);
+    }
+}
+
+impl Write for String {
+    fn write(&mut self, u: u8) {
+        // UPPERCASE_ENCODING contains only ASCII bytes.
+        unsafe {
+            self.as_mut_vec().push(u);
+        }
+    }
+}

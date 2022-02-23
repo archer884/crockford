@@ -1,27 +1,4 @@
-/// Represents writable buffer capable of receiving encoded data.
-///
-/// Write is implemented on `Vec<u8>` and `String`, but you are free to implement it on your own
-/// types. One conceivable purpose would be to allow for lowercase encoding output by inverting
-/// the cap bit before writing.
-pub trait Write {
-    /// Writes a single byte (or, more precisely, a 5-bit group) to the output.
-    fn write(&mut self, u: u8);
-}
-
-impl Write for String {
-    fn write(&mut self, u: u8) {
-        // UPPERCASE_ENCODING contains only ASCII bytes.
-        unsafe {
-            self.as_mut_vec().push(u);
-        }
-    }
-}
-
-impl Write for Vec<u8> {
-    fn write(&mut self, u: u8) {
-        self.push(u);
-    }
-}
+use crate::{Write, UPPERCASE_ENCODING};
 
 /// Encodes a `u64` value as a Crockford Base32-encoded string.
 pub fn encode(n: u64) -> String {
@@ -36,8 +13,9 @@ pub fn encode(n: u64) -> String {
 /// Encodes a `u64` value as Crockford Base32 and writes it to the provided output.
 ///
 /// Either `String` or `Vec<u8>` will be accepted.
-pub fn encode_into<T: Write>(mut n: u64, w: &mut T) {
-    use crate::UPPERCASE_ENCODING;
+pub fn encode_into(mut n: u64, w: &mut impl Write) {
+    /// Number of digits required to represent a fully-populated u64 value.
+    const BASE32_DIGITS: usize = 13;
 
     // Used for the initial shift.
     const QUAD_SHIFT: usize = 60;
@@ -47,39 +25,36 @@ pub fn encode_into<T: Write>(mut n: u64, w: &mut T) {
     const FIVE_SHIFT: usize = 59;
     const FIVE_RESET: usize = 5;
 
-    // After we clear the four most significant bits, the four least significant bits will be
-    // replaced with 0001. We can then know to stop once the four most significant bits are,
-    // likewise, 0001.
-    const STOP_BIT: u64 = 1 << QUAD_SHIFT;
-
+    // Don't waste time on pointless work.
     if n == 0 {
         w.write(b'0');
         return;
     }
 
-    // Start by getting the most significant four bits. We get four here because these would be
-    // leftovers when starting from the least significant bits. In either case, tag the four least
-    // significant bits with our stop bit.
-    match (n >> QUAD_SHIFT) as usize {
-        // Eat leading zero-bits. This should not be done if the first four bits were non-zero.
-        // Additionally, we *must* do this in increments of five bits.
+    // Start by getting the most significant four bits OR by eating any leading
+    // zero bits. After the first four, these zero bits MUST be dropped in sets
+    // of five bits. We must retain the number of zero bits dropped.
+    let digits_dropped = match (n >> QUAD_SHIFT) as usize {
+        // Eat leading zero-bits. Following the first four bits, this MUST be
+        // done in increments of five bits.
         0 => {
             n <<= QUAD_RESET;
-            n |= 1;
-            n <<= n.leading_zeros() / 5 * 5;
+            let dropped = n.leading_zeros() / 5 * 5;
+            n <<= dropped;
+            dropped / 5
         }
 
-        // Write value of first four bytes.
+        // Write value of first four bits.
         i => {
             n <<= QUAD_RESET;
-            n |= 1;
             w.write(UPPERCASE_ENCODING[i]);
+            0
         }
-    }
+    };
 
-    // From now until we reach the stop bit, take the five most significant bits and then shift
-    // left by five bits.
-    while n != STOP_BIT {
+    let remaining_digits = BASE32_DIGITS - digits_dropped as usize - 1;
+
+    for _ in 0..remaining_digits {
         w.write(UPPERCASE_ENCODING[(n >> FIVE_SHIFT) as usize]);
         n <<= FIVE_RESET;
     }
@@ -106,7 +81,7 @@ mod tests {
         let expected = "1ZZZ";
         let actual = encode(input);
 
-        assert_eq!(expected, &*actual);
+        assert_eq!(expected, &*actual, "{} != {}", expected, actual);
     }
 
     #[test]
@@ -145,8 +120,7 @@ mod tests {
         assert_eq!(x, y);
     }
 
-    // Test is ignored because it takes forever to run.
-    #[ignore]
+    #[ignore = "This test takes forever to run."]
     #[test]
     fn round_trips() {
         let mut s = Vec::new();
