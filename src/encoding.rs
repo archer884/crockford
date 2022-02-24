@@ -13,51 +13,43 @@ pub fn encode(n: u64) -> String {
 /// Encodes a `u64` value as Crockford Base32 and writes it to the provided output.
 ///
 /// Either `String` or `Vec<u8>` will be accepted.
-pub fn encode_into(mut n: u64, w: &mut impl Write) {
-    /// Number of digits required to represent a fully-populated u64 value.
-    const BASE32_DIGITS: usize = 13;
+pub fn encode_into(n: u64, w: &mut impl Write) {
+    /// Mask for the first four bits.
+    const MASK_4: u64 = 15;
 
-    // Used for the initial shift.
-    const QUAD_SHIFT: usize = 60;
-    const QUAD_RESET: usize = 4;
+    /// Mask for sets of five bits.
+    const MASK_5: u64 = 31;
 
-    // Used for all subsequent shifts.
-    const FIVE_SHIFT: usize = 59;
-    const FIVE_RESET: usize = 5;
-
-    // Don't waste time on pointless work.
     if n == 0 {
         w.write(b'0');
         return;
     }
 
-    // Start by getting the most significant four bits OR by eating any leading
-    // zero bits. After the first four, these zero bits MUST be dropped in sets
-    // of five bits. We must retain the number of zero bits dropped.
-    let digits_dropped = match (n >> QUAD_SHIFT) as usize {
-        // Eat leading zero-bits. Following the first four bits, this MUST be
-        // done in increments of five bits.
-        0 => {
-            n <<= QUAD_RESET;
-            let dropped = n.leading_zeros() / 5 * 5;
-            n <<= dropped;
-            dropped / 5
-        }
+    // We're gonna use this array as scratch space.
+    let mut buf = [0u8; 13];
+    
+    buf[0] = read_digit(n, 60, MASK_4);
+    buf[1] = read_digit(n, 55, MASK_5);
+    buf[2] = read_digit(n, 50, MASK_5);
+    buf[3] = read_digit(n, 45, MASK_5);
+    buf[4] = read_digit(n, 40, MASK_5);
+    buf[5] = read_digit(n, 35, MASK_5);
+    buf[6] = read_digit(n, 30, MASK_5);
+    buf[7] = read_digit(n, 25, MASK_5);
+    buf[8] = read_digit(n, 20, MASK_5);
+    buf[9] = read_digit(n, 15, MASK_5);
+    buf[10] = read_digit(n, 10, MASK_5);
+    buf[11] = read_digit(n, 5, MASK_5);
+    buf[12] = read_digit(n, 0, MASK_5);
 
-        // Write value of first four bits.
-        i => {
-            n <<= QUAD_RESET;
-            w.write(UPPERCASE_ENCODING[i]);
-            0
-        }
-    };
-
-    let remaining_digits = BASE32_DIGITS - digits_dropped as usize - 1;
-
-    for _ in 0..remaining_digits {
-        w.write(UPPERCASE_ENCODING[(n >> FIVE_SHIFT) as usize]);
-        n <<= FIVE_RESET;
+    for &u in buf.iter().skip_while(|&&u| u == b'0') {
+        w.write(u);
     }
+}
+
+#[inline]
+fn read_digit(n: u64, shift: usize, mask: u64) -> u8 {
+    UPPERCASE_ENCODING[((n >> shift) & mask) as usize]
 }
 
 #[cfg(test)]
