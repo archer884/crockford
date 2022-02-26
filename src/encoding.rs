@@ -60,11 +60,6 @@ pub fn encode_into(mut n: u64, w: &mut impl Write) {
     }
 }
 
-#[inline]
-fn read_digit(n: u64, shift: usize, mask: u64) -> u8 {
-    UPPERCASE_ENCODING[((n >> shift) & mask) as usize]
-}
-
 #[cfg(test)]
 mod tests {
     use std::str;
