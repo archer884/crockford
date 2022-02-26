@@ -23,11 +23,32 @@ impl Write for Vec<u8> {
     }
 }
 
+pub trait Insert {
+    /// Inserts a single byte (or, more precisely, a 5-bit group) to the output.
+    fn insert(&mut self, u: u8);
+}
+
+impl Insert for String {
+    fn insert(&mut self, u: u8) {
+        // UPPERCASE_ENCODING contains only ASCII bytes.
+        unsafe {
+            self.as_mut_vec().insert(0, u);
+        }
+    }
+}
+
+impl Insert for Vec<u8> {
+    fn insert(&mut self, u: u8) {
+        self.insert(0, u);
+    }
+}
+
 /// Encodes a `u64` value as a Crockford Base32-encoded string.
 pub fn encode(n: u64) -> String {
     // The longest possible representation of u64 in Base32 is 13 digits.
     let mut fits = Vec::with_capacity(13);
     encode_into(n, &mut fits);
+    //encode_with_bitmasks(n, &mut fits);
 
     // UPPERCASE_ENCODING contains only ASCII bytes.
     unsafe { String::from_utf8_unchecked(fits) }
@@ -82,6 +103,22 @@ pub fn encode_into<T: Write>(mut n: u64, w: &mut T) {
     while n != STOP_BIT {
         w.write(UPPERCASE_ENCODING[(n >> FIVE_SHIFT) as usize]);
         n <<= FIVE_RESET;
+    }
+}
+
+fn encode_with_bitmasks<T: Insert>(mut n: u64, w: &mut T) {
+    use crate::UPPERCASE_ENCODING;
+    const MASK: u64 = 31;
+
+    if n == 0 {
+        w.insert(b'0');
+        return;
+    }
+
+    while n>0 {
+        let value = n & MASK;
+        w.insert(UPPERCASE_ENCODING[value as usize]);
+        n >>= 5;
     }
 }
 

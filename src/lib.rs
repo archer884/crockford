@@ -68,3 +68,4 @@ pub use error::Error;
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 static UPPERCASE_ENCODING: &[u8] = b"0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+
