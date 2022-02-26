@@ -90,7 +90,6 @@ fn encode_with_bitmasks<T: Write>(mut n: u64, w: &mut T) {
     use crate::UPPERCASE_ENCODING;
     const MASK: u64 = 31;
     let mut result = Vec::with_capacity(13);
-    let mut index = 0;
 
     if n == 0 {
         w.write(b'0');
@@ -100,7 +99,6 @@ fn encode_with_bitmasks<T: Write>(mut n: u64, w: &mut T) {
     while n>0 {
         let value = n & MASK;
         result.push(UPPERCASE_ENCODING[value as usize]);
-        index += 1;
         n >>= 5;
     }
     for &x in result.iter().rev(){
