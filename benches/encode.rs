@@ -2,14 +2,6 @@ use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 fn encode_benchmark(c: &mut Criterion) {
     c.bench_function("encode 5111", |b| {
-        b.iter(|| crockford::encode(black_box(5111)))
-    });
-
-    c.bench_function("encode 184long", |b| {
-        b.iter(|| crockford::encode(black_box(18446744073709551615)))
-    });
-
-    c.bench_function("encode into 5111", |b| {
         let mut buffer = String::with_capacity(13);
         b.iter(|| {
             buffer.clear();
@@ -17,7 +9,7 @@ fn encode_benchmark(c: &mut Criterion) {
         })
     });
 
-    c.bench_function("encode into 184long", |b| {
+    c.bench_function("encode 184long", |b| {
         let mut buffer = String::with_capacity(13);
         b.iter(|| {
             buffer.clear();
@@ -27,5 +19,4 @@ fn encode_benchmark(c: &mut Criterion) {
 }
 
 criterion_group!(encode, encode_benchmark);
-
 criterion_main!(encode);
