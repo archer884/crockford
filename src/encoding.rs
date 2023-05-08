@@ -10,16 +10,15 @@ pub trait Write {
 
 impl Write for String {
     fn write(&mut self, u: u8) {
-        // UPPERCASE_ENCODING contains only ASCII bytes.
         unsafe {
-            self.as_mut_vec().push(u);
+            self.as_mut_vec().push(u & 0x7f);
         }
     }
 }
 
 impl Write for Vec<u8> {
     fn write(&mut self, u: u8) {
-        self.push(u);
+        self.push(u & 0x7f);
     }
 }
 
