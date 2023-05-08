@@ -1,4 +1,4 @@
-# crockford [![Build Status][travis-image]][travis-url]
+# crockford
 
 > Base32 encoding for 64-bit values.
 
