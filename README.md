@@ -63,8 +63,5 @@ at your option.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
 
-[travis-image]: https://travis-ci.org/archer884/crockford.svg?branch=master
-[travis-url]: https://travis-ci.org/archer884/crockford
-
 [apc]: https://github.com/archer884/crockford/blob/master/LICENSE-APACHE
 [mit]: https://github.com/archer884/crockford/blob/master/LICENSE-MIT
