@@ -145,6 +145,9 @@ mod tests {
     }
 
     // Test is ignored because it takes forever to run.
+    // Testing all of these would probably complete right
+    // after the bottom falls out of the solar market--
+    // --you know, because the sun has flared out.
     #[ignore]
     #[test]
     fn round_trips() {

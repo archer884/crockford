@@ -1,6 +1,6 @@
 [package]
 name = "crockford"
-version = "1.1.2"
+version = "1.2.0"
 authors = ["J/A <archer884@gmail.com>"]
 license = "MIT/Apache-2.0"
 edition = "2021"
