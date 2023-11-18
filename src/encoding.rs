@@ -3,22 +3,27 @@
 /// Write is implemented on `Vec<u8>` and `String`, but you are free to implement it on your own
 /// types. One conceivable purpose would be to allow for lowercase encoding output by inverting
 /// the cap bit before writing.
+///
+/// For performance reasons, the default implementation of each of these does not
 pub trait Write {
     /// Writes a single byte (or, more precisely, a 5-bit group) to the output.
-    fn write(&mut self, u: u8);
+    /// 
+    /// # Safety
+    /// 
+    /// Provided implementations of this function **do not** check whether a given u8 byte is
+    /// valid ascii before trying to add each byte to the output string.
+    unsafe fn write(&mut self, u: u8);
 }
 
 impl Write for String {
-    fn write(&mut self, u: u8) {
-        unsafe {
-            self.as_mut_vec().push(u & 0x7f);
-        }
+    unsafe fn write(&mut self, u: u8) {
+        self.as_mut_vec().push(u);
     }
 }
 
 impl Write for Vec<u8> {
-    fn write(&mut self, u: u8) {
-        self.push(u & 0x7f);
+    unsafe fn write(&mut self, u: u8) {
+        self.push(u);
     }
 }
 
@@ -52,7 +57,9 @@ pub fn encode_into<T: Write>(mut n: u64, w: &mut T) {
     const STOP_BIT: u64 = 1 << QUAD_SHIFT;
 
     if n == 0 {
-        w.write(b'0');
+        unsafe {
+            w.write(b'0');
+        }
         return;
     }
 
@@ -72,14 +79,18 @@ pub fn encode_into<T: Write>(mut n: u64, w: &mut T) {
         i => {
             n <<= QUAD_RESET;
             n |= 1;
-            w.write(UPPERCASE_ENCODING[i]);
+            unsafe {
+                w.write(UPPERCASE_ENCODING[i]);
+            }
         }
     }
 
     // From now until we reach the stop bit, take the five most significant bits and then shift
     // left by five bits.
     while n != STOP_BIT {
-        w.write(UPPERCASE_ENCODING[(n >> FIVE_SHIFT) as usize]);
+        unsafe {
+            w.write(UPPERCASE_ENCODING[(n >> FIVE_SHIFT) as usize]);
+        }
         n <<= FIVE_RESET;
     }
 }
@@ -95,7 +106,6 @@ mod tests {
         let input = 0;
         let expected = "0";
         let actual = encode(input);
-
         assert_eq!(expected, &*actual);
     }
 
@@ -104,7 +114,6 @@ mod tests {
         let input = 65535;
         let expected = "1ZZZ";
         let actual = encode(input);
-
         assert_eq!(expected, &*actual);
     }
 
@@ -123,7 +132,6 @@ mod tests {
         // No, this is not a joke.
         let x = 0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001;
         let y = decode(encode(x)).unwrap();
-
         assert_eq!(x, y);
     }
 
@@ -132,7 +140,6 @@ mod tests {
         // No, this is not a joke.
         let x = 0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000;
         let y = decode(encode(x)).unwrap();
-
         assert_eq!(x, y);
     }
 
@@ -140,7 +147,6 @@ mod tests {
     fn tiny_number() {
         let x = 1;
         let y = decode(encode(x)).unwrap();
-
         assert_eq!(x, y);
     }
 
