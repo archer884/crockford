@@ -31,7 +31,8 @@ impl Write for Vec<u8> {
 pub fn encode(n: u64) -> String {
     // The longest possible representation of u64 in Base32 is 13 digits.
     let mut fits = Vec::with_capacity(13);
-    encode_into(n, &mut fits);
+    //encode_into(n, &mut fits);
+    encode_with_bitmasks(n, &mut fits);
 
     // UPPERCASE_ENCODING contains only ASCII bytes.
     unsafe { String::from_utf8_unchecked(fits) }
@@ -92,6 +93,35 @@ pub fn encode_into<T: Write>(mut n: u64, w: &mut T) {
             w.write(UPPERCASE_ENCODING[(n >> FIVE_SHIFT) as usize]);
         }
         n <<= FIVE_RESET;
+    }
+}
+
+fn encode_with_bitmasks<T: Write>(n: u64, w: &mut T) {
+    use crate::REVERSED_ENCODING;
+    use crate::REVERSE4_ENCODING;
+    const MASK5: u64 = 31;
+    const MASK4: u64 = 15;
+    
+    if n == 0 {
+        w.write(b'0');
+        return;
+    }
+
+    let mut shift = (((n.leading_zeros()+1)/5)+1)*5-1; // starting bitshift
+    let r= n.reverse_bits();
+    if shift == 4 {
+        let value = r & MASK4;
+        w.write(REVERSE4_ENCODING[value as usize]);
+    } else if shift > 59 {
+        shift = 59;
+    } else {
+        shift -= 5;
+    }
+
+    while shift < 63 {
+        let value = (r>>shift) & MASK5;
+        shift += 5;
+        w.write(REVERSED_ENCODING[value as usize]);
     }
 }
 
@@ -169,6 +199,33 @@ mod tests {
             encode_into(n, &mut s);
             assert_eq!(n, decode(str::from_utf8(&s).unwrap()).unwrap());
             s.clear();
+        }
+    }
+
+    #[test]
+    fn test_leading_zeros(){
+        let mut n=1u64;
+        n = n.reverse_bits();
+        for x in 0..64 {
+            let actual = (((n.leading_zeros()+1)/5)+1)*5-1;  // make sure this is the same equation as above
+            let expected: u32 = match x {
+                0..=3 => 4,
+                4..=8 => 9,
+                9..=13 => 14,
+                14..=18 => 19,
+                19..=23 => 24,
+                24..=28 => 29,
+                29..=33 => 34,
+                34..=38 => 39,
+                39..=43 => 44,
+                44..=48 => 49,
+                49..=53 => 54,
+                54..=58 => 59,
+                59..=63 => 64,
+                _ => 0
+            };
+            assert_eq!(expected, actual);
+            n >>= 1;
         }
     }
 }
