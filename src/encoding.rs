@@ -16,9 +16,9 @@ pub trait Write {
 }
 
 impl Write for String {
-    unsafe fn write(&mut self, u: u8) {
+    unsafe fn write(&mut self, u: u8) { unsafe {
         self.as_mut_vec().push(u);
-    }
+    }}
 }
 
 impl Write for Vec<u8> {
